@@ -31,12 +31,12 @@ st.info(f"""
 
 # --- 2. 核心处理逻辑 ---
 def process_logic():
-    col1, col2, col3 = st.columns(3)
-    with col1:
+    col_up1, col_up2, col_up3 = st.columns(3)
+    with col_up1:
         container_file = st.file_uploader("1. 上传 containerinformation", type=["xlsx"])
-    with col2:
+    with col_up2:
         template_file = st.file_uploader("2. 上传 icstemplate", type=["xlsx"])
-    with col3:
+    with col_up3:
         realdoc_zip = st.file_uploader("3. 上传 realdoc.zip", type=["zip"])
 
     if st.button("🔥 执行全流程处理", use_container_width=True):
@@ -107,7 +107,7 @@ process_logic()
 st.markdown("<br><br><hr>", unsafe_allow_html=True)
 st.subheader("🛠️ 资源与支持")
 
-# 强制按钮文字为白色，确保深色背景下清晰
+# 强制所有按钮文字样式统一
 st.markdown("""
     <style>
     .stButton button, .stDownloadButton button, .stLinkButton a {
@@ -117,36 +117,36 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-footer_col1, footer_col2 = st.columns(2)
+footer_col1, footer_col2, footer_col3 = st.columns(3)
 
 with footer_col1:
     st.markdown("#### 📖 操作指导")
     guide_path = "ICS2业务自动化整合工具使用说明.docx"
     if os.path.exists(guide_path):
         with open(guide_path, "rb") as f:
-            st.download_button(
-                label="📥 点击下载《使用指南.docx》",
-                data=f.read(),
-                file_name="ICS2业务自动化整合工具使用说明.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                use_container_width=True
-            )
+            st.download_button(label="📥 下载《使用指南.docx》", data=f.read(), file_name="ICS2业务自动化整合工具使用说明.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
     else:
-        st.button("❌ 指南文件缺失", use_container_width=True, disabled=True)
+        st.button("❌ 指南缺失", use_container_width=True, disabled=True)
 
 with footer_col2:
+    st.markdown("#### 📥 模板下载")
+    # 提供三个模板文件的打包下载
+    template_files = ["containerinformation.xlsx", "icstemplate.xlsx", "realdoc.zip"]
+    valid_templates = [f for f in template_files if os.path.exists(f)]
+    
+    if valid_templates:
+        template_zip = io.BytesIO()
+        with zipfile.ZipFile(template_zip, "w") as z:
+            for f in valid_templates:
+                z.write(f)
+        st.download_button(label="📦 下载全套业务模板.zip", data=template_zip.getvalue(), file_name="ICS2_Business_Templates.zip", mime="application/zip", use_container_width=True)
+    else:
+        st.button("❌ 模板缺失", use_container_width=True, disabled=True)
+
+with footer_col3:
     st.markdown("#### 📧 意见反馈")
     feedback_email = "yjfk@tswcbyy.com"
-    st.link_button(
-        label=f"📩 发送邮件反馈至：{feedback_email}",
-        url=f"mailto:{feedback_email}?subject=ICS2工具意见反馈",
-        use_container_width=True
-    )
+    st.link_button(label=f"📩 发送邮件反馈", url=f"mailto:{feedback_email}?subject=ICS2工具意见反馈", use_container_width=True)
 
 # --- 4. 极简结尾标语 ---
-st.markdown("<br><br>", unsafe_allow_html=True)
-st.markdown("""
-    <div style="text-align: center; color: #555e6d; font-family: sans-serif;">
-        <p style="font-size: 18px; font-weight: 500;">小事找GARY，大事请Google</p>
-    </div>
-""", unsafe_allow_html=True)
+st.markdown("<br><br><div style='text-align: center; color: #555e6d; font-family: sans-serif;'><p style='font-size: 18px; font-weight: 500;'>小事找GARY，大事请Google</p></div>", unsafe_allow_html=True)
