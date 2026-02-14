@@ -10,13 +10,11 @@ import io
 # 页面配置
 st.set_page_config(page_title="Excel 业务自动化整合工具", layout="wide")
 
-st.title("📂 ICS2业务自动化整合工具")
+st.title("🚀 业务自动化整合工具 (优化版)")
 st.markdown("""
-### 使用说明：
-1. **上传 `containerinformation.xlsx`**: 包含单号、件数、重量、HS CODE等原始数据。
-2. **上传 `icstemplate.xlsx`**: 作为生成单号文件的模板。
-3. **上传 `realdoc.zip`**: 包含额外补充信息的压缩包，文件名应与单号一致。
-4. **点击处理**: 程序将自动生成中间文件并进行二次填充，最后提供下载。
+### 更新说明：
+- **空值增强处理**：如果 `realdoc` 中的单元格为空，程序将自动填充 **"N/A"**，确保置换过程不中断。
+- **流程整合**：需求1生成文件 -> 需求2数据置换 -> 最终压缩包下载。
 """)
 
 def process_logic():
@@ -46,8 +44,13 @@ def process_logic():
                     os.makedirs(out_dir)
 
                     # --- 步骤 1: 处理需求一 (生成中间文件 P) ---
+                    # 读取数据并自动填充空单号
                     df = pd.read_excel(container_file)
-                    df['单号'] = df['单号'].ffill() # 自动填充空单号
+                    if '单号' in df.columns:
+                        df['单号'] = df['单号'].ffill()
+                    else:
+                        st.error("错误：containerinformation 文件中未找到 '单号' 列")
+                        return
                     
                     template_bytes = template_file.read()
                     grouped = df.groupby('单号')
@@ -78,16 +81,13 @@ def process_logic():
                         # 保存到临时 P 文件夹
                         wb.save(os.path.join(p_dir, f"{bill_no}.xlsx"))
 
-                    # --- 步骤 2: 处理需求二 (从 realdoc 提取数据到 P) ---
-                    # 解压 realdoc 到 R
+                    # --- 步骤 2: 处理需求二 (置换逻辑，增加 N/A 处理) ---
                     with zipfile.ZipFile(realdoc_zip, 'r') as z:
                         z.extractall(r_dir)
 
-                    # 定义映射关系
                     row_mapping = {7: 14, 8: 15, 10: 18, 11: 19}
                     columns = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
 
-                    # 匹配并合并
                     p_files = [f for f in os.listdir(p_dir) if f.endswith('.xlsx')]
                     match_count = 0
                     
@@ -103,12 +103,20 @@ def process_logic():
 
                             for src_row, tgt_row in row_mapping.items():
                                 for col in columns:
-                                    ws_p[f"{col}{tgt_row}"].value = ws_r[f"{col}{src_row}"].value
+                                    source_val = ws_r[f"{col}{src_row}"].value
+                                    
+                                    # --- 核心改进：空值判断 ---
+                                    if source_val is None or str(source_val).strip() == "":
+                                        final_val = "N/A"
+                                    else:
+                                        final_val = source_val
+                                    
+                                    ws_p[f"{col}{tgt_row}"].value = final_val
                             
                             wb_p.save(os.path.join(out_dir, filename))
                             match_count += 1
                         else:
-                            # 如果 realdoc 里没找到，也将中间件移过去，方便排查
+                            # 如果 realdoc 里没找到匹配文件，将需求1生成的文件直接移入输出目录
                             shutil.copy(p_path, os.path.join(out_dir, filename))
 
                     # --- 步骤 3: 打包最终结果 ---
@@ -117,16 +125,16 @@ def process_logic():
                         for f in os.listdir(out_dir):
                             z.write(os.path.join(out_dir, f), arcname=f)
                     
-                    st.success(f"✅ 处理完成！共处理 {len(p_files)} 个单号，其中 {match_count} 个成功匹配 realdoc 补充信息。")
+                    st.success(f"✅ 处理完成！共生成 {len(p_files)} 个单号文件，其中 {match_count} 个已完成 realdoc 数据置换（空值已填补为 N/A）。")
                     st.download_button(
                         label="📥 点击下载最终结果包 (.zip)",
                         data=zip_buffer.getvalue(),
-                        file_name="final_results.zip",
+                        file_name="final_output.zip",
                         mime="application/zip"
                     )
 
             except Exception as e:
-                st.error(f"发生错误: {e}")
+                st.error(f"发生程序错误: {e}")
 
 if __name__ == "__main__":
     process_logic()
