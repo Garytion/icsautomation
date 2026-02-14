@@ -7,10 +7,22 @@ import shutil
 import tempfile
 import io
 
-st.set_page_config(page_title="业务自动化整合工具", layout="wide")
+st.set_page_config(page_title="📂 ICS2业务自动化整合工具", layout="wide")
 
-st.title("🚀 业务自动化工具 (路径修正 & 空值 N/A 版)")
-st.info("解决 realdoc 无法置换问题：支持子文件夹搜索，并将空值置换为 N/A。")
+st.title("📂 ICS2业务自动化整合工具")
+st.info("
+文件一：containerinformation.xlsx
+o来源：此文件通常由系统生成，用于补料。
+o内容要求：请将附件中的品名、HS CODE、件数、重量(KGS)、体积(CBM)及单号信息准确复制至本文件。其中“单号”栏位请填写客户申报ICS所用的号码；如客户未指定，则默认使用我司单号。
+文件二：icstemplate.xlsx
+o来源：此为ICS申报系统提供的标准申报表模板。
+o内容要求：根据您所申报的主单及柜号，将相应的基础柜子信息填写完整即可。
+文件三：realdoc.zip
+o来源：此文件为客户在对单过程中，根据我司（深圳）格式要求填写的真实收发货人信息表。
+o内容要求：收到客户回传的表格后，请先核验信息无误。随后，按申报单号将同一柜子所有客户的相关资料整理并压缩为一个ZIP文件。
+
+2026/02/14更新：解决 realdoc 无法置换问题：支持子文件夹搜索，并将空值置换为 N/A。
+")
 
 def process_logic():
     col1, col2, col3 = st.columns(3)
