@@ -54,7 +54,7 @@ def process_logic():
     with col3:
         realdoc_zip = st.file_uploader("3. 上传 realdoc.zip", type=["zip"])
 
-    if st.button("🔥 执行全流程处理"):
+    if st.button("🚀 执行全流程处理"):
         if not (container_file and template_file and realdoc_zip):
             st.error("请确保三个必要文件均已上传！")
             return
@@ -157,3 +157,4 @@ def process_logic():
 
 if __name__ == "__main__":
     process_logic()
+
