@@ -7,76 +7,71 @@ import shutil
 import tempfile
 import io
 import urllib.parse
-import random
 
 # 页面配置
 st.set_page_config(page_title="ICS2业务自动化整合工具", layout="wide")
 
 # ==========================================
-# 🌟 修复版V2：鼠标点击特效 (内部兼容模式)
+# 🌟 终极增强版：鼠标点击特效 (全局挂载模式)
 # ==========================================
 def add_click_effect():
+    # 使用 components.html 或直接 markdown 注入，并增加 window 级别的持久化
     st.markdown("""
+    <div id="click-effect-root"></div>
     <script>
-        // 移除旧的监听器防止重复叠加 (如果有的话)
-        if (window.clickEffectAttached) {
-            // 如果已经加载过，就不再重复加载，防止每次页面刷新导致多重绑定
-        } else {
-            window.clickEffectAttached = true;
+        (function() {
+            var words = ["富强", "民主", "文明", "和谐", "自由", "平等", "公正", "法治", "爱国", "敬业", "诚信", "友善"];
+            var index = 0;
             
-            document.body.addEventListener('click', function(e) {
-                var a = ["富强", "民主", "文明", "和谐", "自由", "平等", "公正", "法治", "爱国", "敬业", "诚信", "友善"];
-                
-                // 随机获取一个词
-                var text = a[Math.floor(Math.random() * a.length)];
+            // 绑定到最顶层窗口，确保全覆盖
+            document.addEventListener('click', function(e) {
+                var target = e.target;
+                // 排除点击上传按钮等交互组件时可能产生的干扰
                 
                 var span = document.createElement("span");
-                span.textContent = text;
+                span.textContent = words[index];
+                index = (index + 1) % words.length;
                 
                 // 随机颜色
                 var color = "rgb(" + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + ")";
                 
-                // 获取点击位置 (兼容滚动条)
-                var x = e.pageX;
-                var y = e.pageY;
+                // 坐标位置
+                var x = e.clientX;
+                var y = e.clientY;
                 
-                // 设置样式
-                span.style.zIndex = 9999999999; // 确保在最上层
-                span.style.top = (y - 20) + "px";
-                span.style.left = x + "px";
-                span.style.position = "absolute";
-                span.style.fontWeight = "bold";
+                span.style.cssText = "z-index: 2147483647; position: fixed; font-weight: bold; font-family: sans-serif; pointer-events: none; user-select: none;";
                 span.style.color = color;
-                span.style.fontSize = "16px";
-                span.style.userSelect = "none";
-                span.style.pointerEvents = "none"; // 关键：让鼠标点击能穿透文字，不影响下方按钮使用
+                span.style.left = (x - 20) + "px";
+                span.style.top = (y - 20) + "px";
+                span.style.fontSize = "18px";
                 
                 document.body.appendChild(span);
                 
-                // 动画逻辑
-                var alpha = 1;
                 var top = y - 20;
+                var opacity = 1;
+                var scale = 1;
                 
-                var timer = setInterval(function() {
-                    if (alpha <= 0) {
-                        document.body.removeChild(span);
-                        clearInterval(timer);
+                var anim = setInterval(function() {
+                    if (opacity <= 0) {
+                        span.remove();
+                        clearInterval(anim);
                     } else {
-                        top--;
-                        alpha -= 0.02;
+                        top -= 0.8;
+                        opacity -= 0.015;
+                        scale += 0.005;
                         span.style.top = top + "px";
-                        span.style.opacity = alpha;
+                        span.style.opacity = opacity;
+                        span.style.transform = "scale(" + scale + ")";
                     }
-                }, 15);
+                }, 12);
             });
-        }
+        })();
     </script>
     """, unsafe_allow_html=True)
 
 # 启动特效
 add_click_effect()
 # ==========================================
-
 
 # --- 1. 主界面标题与说明 ---
 st.title("📂 ICS2业务自动化整合工具")
@@ -174,7 +169,6 @@ process_logic()
 st.markdown("<br><br><hr>", unsafe_allow_html=True)
 st.subheader("🛠️ 资源与支持")
 
-# 强制所有按钮文字样式统一
 st.markdown("""
     <style>
     .stButton button, .stDownloadButton button, .stLinkButton a {
@@ -192,22 +186,18 @@ with footer_col1:
     if os.path.exists(guide_path):
         with open(guide_path, "rb") as f:
             st.download_button(label="📥 下载《使用指南.docx》", data=f.read(), file_name="ICS2业务自动化整合工具使用说明.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
-    else:
-        st.button("❌ 指南缺失", use_container_width=True, disabled=True)
+    else: st.button("❌ 指南缺失", use_container_width=True, disabled=True)
 
 with footer_col2:
     st.markdown("#### 📥 模板下载")
     template_files = ["containerinformation.xlsx", "icstemplate.xlsx", "realdoc.zip"]
     valid_templates = [f for f in template_files if os.path.exists(f)]
-    
     if valid_templates:
         template_zip = io.BytesIO()
         with zipfile.ZipFile(template_zip, "w") as z:
-            for f in valid_templates:
-                z.write(f)
+            for f in valid_templates: z.write(f)
         st.download_button(label="📦 下载全套业务模板.zip", data=template_zip.getvalue(), file_name="ICS2_Business_Templates.zip", mime="application/zip", use_container_width=True)
-    else:
-        st.button("❌ 模板缺失", use_container_width=True, disabled=True)
+    else: st.button("❌ 模板缺失", use_container_width=True, disabled=True)
 
 with footer_col3:
     st.markdown("#### 📧 意见反馈")
