@@ -7,7 +7,6 @@ import shutil
 import tempfile
 import io
 import urllib.parse
-import webbrowser
 
 # 页面配置
 st.set_page_config(page_title="ICS2业务自动化整合工具", layout="wide")
@@ -104,18 +103,14 @@ def process_logic():
 
 process_logic()
 
-# --- 3. 底部：完全一致的资源与支持区块 ---
+# --- 3. 底部：资源与支持区块 ---
 st.markdown("<br><br><hr>", unsafe_allow_html=True)
 st.subheader("🛠️ 资源与支持")
 
-# 使用 CSS 强制把按钮里的文字改为白色，解决看不清的问题
+# 强制按钮文字为白色，确保深色背景下清晰
 st.markdown("""
     <style>
-    div[st-metric] p, button p {
-        color: white !important;
-    }
-    /* 针对所有 st.button 和 st.download_button 的文字加粗并设为白色 */
-    .stButton button, .stDownloadButton button {
+    .stButton button, .stDownloadButton button, .stLinkButton a {
         color: white !important;
         font-weight: bold !important;
     }
@@ -142,12 +137,16 @@ with footer_col1:
 with footer_col2:
     st.markdown("#### 📧 意见反馈")
     feedback_email = "yjfk@tswcbyy.com"
-    # 使用 st.link_button，它是原生组件，外观与下载按钮完全一致
     st.link_button(
         label=f"📩 发送邮件反馈至：{feedback_email}",
         url=f"mailto:{feedback_email}?subject=ICS2工具意见反馈",
         use_container_width=True
     )
 
-# --- 4. 花里胡哨的结尾 ---
-st.markdown("<br><br><div style='text-align: center;'><span style='font-size: 40px; font-weight: bold; background: linear-gradient(to left, #ef5350, #f48fb1, #7e57c2, #2196f3, #26c6da, #43a047, #eeff41, #f9a825, #ff5722); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 2px 2px 10px rgba(0,0,0,0.1);'>✨ 有事找GARY准没错 ✨</span></div>", unsafe_allow_html=True)
+# --- 4. 极简结尾标语 ---
+st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("""
+    <div style="text-align: center; color: #555e6d; font-family: sans-serif;">
+        <p style="font-size: 18px; font-weight: 500;">小事找GARY，大事请Google</p>
+    </div>
+""", unsafe_allow_html=True)
