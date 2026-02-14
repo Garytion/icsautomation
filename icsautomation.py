@@ -13,50 +13,56 @@ import random
 st.set_page_config(page_title="ICS2业务自动化整合工具", layout="wide")
 
 # ==========================================
-# 🌟 新增功能：鼠标点击随机上浮多彩文字特效
+# 🌟 修复版：鼠标点击随机上浮多彩文字特效
 # ==========================================
 def add_click_effect():
     st.markdown("""
     <script>
+        // 强制在主窗口（父窗口）执行，穿透Streamlit的Iframe沙盒
+        var parentDoc = window.parent.document;
+        
         (function() {
             var a_idx = 0;
-            window.onclick = function(event) {
+            
+            // 绑定点击事件到父级文档
+            parentDoc.onclick = function(event) {
                 var a = new Array("富强", "民主", "文明", "和谐", "自由", "平等", "公正", "法治", "爱国", "敬业", "诚信", "友善");
                 
-                var heart = document.createElement("b"); // 创建b元素
-                heart.onselectstart = new Function('event.returnValue=false'); // 防止选中
+                var span = parentDoc.createElement("span");
+                span.onselectstart = new Function('event.returnValue=false');
 
-                document.body.appendChild(heart).innerHTML = a[a_idx]; // 将词语添加到页面
+                // 将文字添加到父级body中
+                parentDoc.body.appendChild(span).innerHTML = a[a_idx];
                 a_idx = (a_idx + 1) % a.length;
                 
-                // 随机颜色函数
                 function randomColor() {
                     return "rgb(" + ~~(Math.random() * 255) + "," + ~~(Math.random() * 255) + "," + ~~(Math.random() * 255) + ")";
                 }
 
-                heart.style.cssText = "position: fixed;left:-100%;"; // 初始化位置
-                
-                var f = 16, // 字体大小
-                    x = event.clientX - f / 2, // 横坐标
-                    y = event.clientY - f, // 纵坐标
-                    c = randomColor(), // 随机颜色
-                    a = 1, // 透明度
-                    s = 1.2; // 放大倍数
+                // 获取点击坐标 (相对于视口)
+                var x = event.clientX;
+                var y = event.clientY;
 
-                var timer = setInterval(function() { // 添加定时器
-                    if (a <= 0) {
-                        document.body.removeChild(heart);
+                span.style.cssText = "z-index: 9999999; position: fixed; top: " + y + "px; left: " + x + "px; font-weight: bold; color: " + randomColor() + "; user-select: none; pointer-events: none;";
+
+                var opacity = 1;
+                var scale = 1;
+                
+                // 动画定时器
+                var timer = setInterval(function() {
+                    if (opacity <= 0) {
+                        span.parentNode.removeChild(span);
                         clearInterval(timer);
                     } else {
-                        heart.style.cssText = "font-size:16px;cursor: default;position: fixed;color:" +
-                            c + ";left:" + x + "px;top:" + y + "px;opacity:" + a + ";transform:scale(" +
-                            s + ");z-index:99999;font-weight:bold;pointer-events:none;";
-
-                        y--;
-                        a -= 0.016;
-                        s += 0.002;
+                        y--; // 向上飘动
+                        opacity -= 0.02; // 逐渐消失
+                        scale += 0.01; // 逐渐放大
+                        
+                        span.style.top = y + "px";
+                        span.style.opacity = opacity;
+                        span.style.transform = "scale(" + scale + ")";
                     }
-                }, 15)
+                }, 15);
             }
         })();
     </script>
