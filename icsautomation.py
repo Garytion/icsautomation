@@ -171,28 +171,31 @@ with footer_col2:
     body = urllib.parse.quote("请在此处输入您的意见或报错描述：\n")
     mail_link = f"mailto:{feedback_email}?subject={subject}&body={body}"
     
-    # 调整反馈按钮底色为正常灰色（与 Streamlit 默认按钮一致）
+    # 使用透明背景和继承样式，确保底色与左侧 st.download_button 完全一致
     st.markdown(f"""
     <a href="{mail_link}" style="text-decoration: none;">
         <div style="
-            background-color: #f0f2f6; 
-            color: #31333F; 
+            background-color: rgba(151, 166, 195, 0.15); 
+            color: rgb(49, 51, 63); 
+            line-height: 1.6;
+            padding: 0.5rem 1rem;
             border: 1px solid rgba(49, 51, 63, 0.2);
-            padding: 10px; 
-            border-radius: 8px; 
-            text-align: center; 
-            font-weight: 500; 
-            height: 45px; 
-            display: flex; 
-            align-items: center; 
+            border-radius: 0.5rem;
+            text-align: center;
+            font-size: 1rem;
+            font-family: inherit;
+            height: 45px;
+            display: flex;
+            align-items: center;
             justify-content: center;
+            transition: border-color 0.2s, color 0.2s;
         ">
             📩 发送邮件反馈至：{feedback_email}
         </div>
     </a>
     """, unsafe_allow_html=True)
 
-# --- 4. 结尾标语 ---
+# --- 4. 花里胡哨的结尾 ---
 st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown("""
     <div style="text-align: center;">
@@ -201,7 +204,7 @@ st.markdown("""
             font-weight: bold; 
             background: linear-gradient(to left, #ef5350, #f48fb1, #7e57c2, #2196f3, #26c6da, #43a047, #eeff41, #f9a825, #ff5722);
             -webkit-background-clip: text;
-            color: transparent;
+            -webkit-text-fill-color: transparent;
             text-shadow: 2px 2px 10px rgba(0,0,0,0.1);
         ">
             ✨ 有事找GARY准没错 ✨
