@@ -171,15 +171,15 @@ with footer_col2:
     body = urllib.parse.quote("请在此处输入您的意见或报错描述：\n")
     mail_link = f"mailto:{feedback_email}?subject={subject}&body={body}"
     
-    # 强制将背景色设为 Streamlit 蓝色，文字设为白色以确保清晰度
+    # 颜色改动：背景色使用原生深灰色 (rgba(151, 166, 195, 0.25))，文字强制白色 (#FFFFFF)
     st.markdown(f"""
     <a href="{mail_link}" style="text-decoration: none;">
         <div style="
-            background-color: #0068c9; 
+            background-color: #555e6d; 
             color: #FFFFFF; 
             line-height: 1.6;
             padding: 0.5rem 1rem;
-            border: 1px solid #0068c9;
+            border: 1px solid rgba(49, 51, 63, 0.2);
             border-radius: 0.5rem;
             text-align: center;
             font-size: 1rem;
