@@ -14,15 +14,15 @@ st.set_page_config(page_title="ICS2业务自动化整合工具", layout="wide")
 # --- 1. 主界面标题与说明 ---
 st.title("📂 ICS2业务自动化整合工具")
 st.info(f"""
-**⭐文件一：containerinformation.xlsx**
+**· 文件一：containerinformation.xlsx**
 - **来源**：此文件通常由系统生成，用于补料。
 - **内容要求**：请将附件中的品名、HS CODE、件数、重量(KGS)、体积(CBM)及单号信息准确复制至本文件。其中“单号”栏位请填写客户申报ICS所用的号码；如客户未指定，则默认使用我司单号。
 
-**⭐文件二：icstemplate.xlsx**
+**· 文件二：icstemplate.xlsx**
 - **来源**：此为ICS申报系统提供的标准申报表模板。
 - **内容要求**：根据您所申报的主单及柜号，将相应的基础柜子信息填写完整即可。
 
-**⭐文件三：realdoc.zip**
+**· 文件三：realdoc.zip**
 - **来源**：此文件为客户在对单过程中，根据我司（深圳）格式要求填写的真实收发货人信息表。
 - **内容要求**：收到客户回传的表格后，请先核验信息无误。随后，按申报单号将同一柜子所有客户的相关资料整理并压缩为一个ZIP文件。
 
@@ -143,7 +143,7 @@ def process_logic():
 # 执行主体逻辑
 process_logic()
 
-# --- 3. 底部醒目资源与反馈区 ---
+# --- 3. 底部资源与反馈区 ---
 st.markdown("<br><br><hr>", unsafe_allow_html=True)
 st.subheader("🛠️ 资源与支持")
 
@@ -171,15 +171,28 @@ with footer_col2:
     body = urllib.parse.quote("请在此处输入您的意见或报错描述：\n")
     mail_link = f"mailto:{feedback_email}?subject={subject}&body={body}"
     
+    # 调整反馈按钮底色为正常灰色（与 Streamlit 默认按钮一致）
     st.markdown(f"""
     <a href="{mail_link}" style="text-decoration: none;">
-        <div style="background-color: #ff4b4b; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; height: 45px; display: flex; align-items: center; justify-content: center;">
+        <div style="
+            background-color: #f0f2f6; 
+            color: #31333F; 
+            border: 1px solid rgba(49, 51, 63, 0.2);
+            padding: 10px; 
+            border-radius: 8px; 
+            text-align: center; 
+            font-weight: 500; 
+            height: 45px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+        ">
             📩 发送邮件反馈至：{feedback_email}
         </div>
     </a>
     """, unsafe_allow_html=True)
 
-# --- 4. 花里胡哨的结尾 ---
+# --- 4. 结尾标语 ---
 st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown("""
     <div style="text-align: center;">
