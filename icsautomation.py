@@ -10,6 +10,22 @@ import io
 # 页面配置
 st.set_page_config(page_title="ICS2业务自动化整合工具", layout="wide")
 
+# --- 侧边栏：添加使用指南下载功能 ---
+with st.sidebar:
+    st.header("相关资源")
+    # 读取指南文件并提供下载（假设文件名为您上传的名称）
+    guide_path = "ICS2业务自动化整合工具使用说明.docx"
+    if os.path.exists(guide_path):
+        with open(guide_path, "rb") as f:
+            st.download_button(
+                label="📖 下载使用指南 (Word)",
+                data=f.read(),
+                file_name="ICS2业务自动化整合工具使用说明.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+    else:
+        st.warning("提示：请确保项目根目录下存在《ICS2业务自动化整合工具使用说明.docx》文件，以便用户下载。")
+
 # --- 界面标题与说明 ---
 st.title("📂 ICS2业务自动化整合工具")
 st.info(f"""
@@ -54,7 +70,6 @@ def process_logic():
 
                     # --- 步骤 1: 处理需求一 (根据单号拆分并填充模板) ---
                     df = pd.read_excel(container_file)
-                    # 清洗单号：转为字符串、去空格、向下填充空值
                     df['单号'] = df['单号'].astype(str).str.strip().ffill()
                     
                     template_bytes = template_file.read()
@@ -64,19 +79,14 @@ def process_logic():
                         if bill_no.lower() == "nan" or not bill_no:
                             continue
                         
-                        # 重新加载模板
                         wb = load_workbook(io.BytesIO(template_bytes))
                         ws = wb.active
                         
-                        # 填充头部汇总信息
                         ws['B5'] = bill_no
                         ws['B8'] = group['件数'].sum()
                         ws['B9'] = group['重量(KGS)'].sum()
-                        
-                        # 记录F130的默认值用于向下填充
                         f130_val = ws['F130'].value
 
-                        # 填充明细行 (从130行开始)
                         for i, (_, row) in enumerate(group.iterrows()):
                             curr_row = 130 + i
                             ws[f'A{curr_row}'] = row['HS CODE']
@@ -92,14 +102,12 @@ def process_logic():
                     with zipfile.ZipFile(realdoc_zip, 'r') as z:
                         z.extractall(r_dir)
 
-                    # 建立 realdoc 索引 (支持子文件夹搜索)
                     realdoc_map = {}
                     for root, _, files in os.walk(r_dir):
                         for f in files:
                             if f.endswith('.xlsx'):
                                 realdoc_map[f.strip()] = os.path.join(root, f)
 
-                    # 置换规则
                     row_mapping = {7: 14, 8: 15, 10: 18, 11: 19}
                     columns = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
 
