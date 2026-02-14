@@ -6,27 +6,12 @@ import os
 import shutil
 import tempfile
 import io
+import urllib.parse
 
 # 页面配置
 st.set_page_config(page_title="ICS2业务自动化整合工具", layout="wide")
 
-# --- 侧边栏：添加使用指南下载功能 ---
-with st.sidebar:
-    st.header("相关资源")
-    # 读取指南文件并提供下载（假设文件名为您上传的名称）
-    guide_path = "ICS2业务自动化整合工具使用说明.docx"
-    if os.path.exists(guide_path):
-        with open(guide_path, "rb") as f:
-            st.download_button(
-                label="📖 下载使用指南 (Word)",
-                data=f.read(),
-                file_name="ICS2业务自动化整合工具使用说明.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
-    else:
-        st.warning("提示：请确保项目根目录下存在《ICS2业务自动化整合工具使用说明.docx》文件，以便用户下载。")
-
-# --- 界面标题与说明 ---
+# --- 1. 主界面标题与说明 ---
 st.title("📂 ICS2业务自动化整合工具")
 st.info(f"""
 **⭐文件一：containerinformation.xlsx**
@@ -44,8 +29,8 @@ st.info(f"""
 :red[2026/02/14更新：解决 realdoc 无法置换问题：支持子文件夹搜索，并将空值置换为 N/A。]
 """)
 
+# --- 2. 核心处理逻辑函数 ---
 def process_logic():
-    # 文件上传组件
     col1, col2, col3 = st.columns(3)
     with col1:
         container_file = st.file_uploader("1. 上传 containerinformation", type=["xlsx"])
@@ -54,21 +39,20 @@ def process_logic():
     with col3:
         realdoc_zip = st.file_uploader("3. 上传 realdoc.zip", type=["zip"])
 
-    if st.button("🚀 执行全流程处理"):
+    if st.button("🔥 执行全流程处理", use_container_width=True):
         if not (container_file and template_file and realdoc_zip):
             st.error("请确保三个必要文件均已上传！")
             return
 
         with st.spinner("程序正在进行深度匹配与数据置换..."):
             try:
-                # 使用临时目录处理
                 with tempfile.TemporaryDirectory() as tmp_dir:
                     r_dir = os.path.join(tmp_dir, "R")
                     p_dir = os.path.join(tmp_dir, "P")
                     out_dir = os.path.join(tmp_dir, "Output")
                     os.makedirs(r_dir); os.makedirs(p_dir); os.makedirs(out_dir)
 
-                    # --- 步骤 1: 处理需求一 (根据单号拆分并填充模板) ---
+                    # --- 步骤 1: 生成中间文件 P ---
                     df = pd.read_excel(container_file)
                     df['单号'] = df['单号'].astype(str).str.strip().ffill()
                     
@@ -98,7 +82,7 @@ def process_logic():
                         
                         wb.save(os.path.join(p_dir, f"{bill_no}.xlsx"))
 
-                    # --- 步骤 2: 处理需求二 (从 realdoc 置换数据) ---
+                    # --- 步骤 2: realdoc 置换 ---
                     with zipfile.ZipFile(realdoc_zip, 'r') as z:
                         z.extractall(r_dir)
 
@@ -138,23 +122,76 @@ def process_logic():
                         else:
                             shutil.copy(p_path, os.path.join(out_dir, filename))
 
-                    # --- 步骤 3: 结果打包 ---
+                    # --- 步骤 3: 打包 ---
                     zip_buffer = io.BytesIO()
                     with zipfile.ZipFile(zip_buffer, "w") as z:
                         for f in os.listdir(out_dir):
                             z.write(os.path.join(out_dir, f), arcname=f)
                     
-                    st.success(f"✅ 处理成功！已生成 {len(p_files)} 个文件，其中 {match_count} 个已置换 realdoc 信息。")
+                    st.success(f"✅ 处理成功！已生成 {len(p_files)} 个文件，置换 {match_count} 个。")
                     st.download_button(
                         label="📥 下载最终结果压缩包",
                         data=zip_buffer.getvalue(),
                         file_name="ICS2_Processed_Results.zip",
-                        mime="application/zip"
+                        mime="application/zip",
+                        use_container_width=True
                     )
 
             except Exception as e:
                 st.error(f"⚠️ 处理过程中发生错误: {str(e)}")
 
-if __name__ == "__main__":
-    process_logic()
+# 执行主体逻辑
+process_logic()
 
+# --- 3. 底部醒目资源与反馈区 ---
+st.markdown("<br><br><hr>", unsafe_allow_html=True)
+st.subheader("🛠️ 资源与支持")
+
+footer_col1, footer_col2 = st.columns(2)
+
+with footer_col1:
+    st.markdown("#### 📖 操作指导")
+    guide_path = "ICS2业务自动化整合工具使用说明.docx"
+    if os.path.exists(guide_path):
+        with open(guide_path, "rb") as f:
+            st.download_button(
+                label="点击下载《使用指南.docx》",
+                data=f.read(),
+                file_name="ICS2业务自动化整合工具使用说明.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                use_container_width=True
+            )
+    else:
+        st.warning("指导文件缺失，请检查根目录。")
+
+with footer_col2:
+    st.markdown("#### 📧 意见反馈")
+    feedback_email = "yjfk@tswcbyy.com"
+    subject = urllib.parse.quote("ICS2工具意见反馈")
+    body = urllib.parse.quote("请在此处输入您的意见或报错描述：\n")
+    mail_link = f"mailto:{feedback_email}?subject={subject}&body={body}"
+    
+    st.markdown(f"""
+    <a href="{mail_link}" style="text-decoration: none;">
+        <div style="background-color: #ff4b4b; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; height: 45px; display: flex; align-items: center; justify-content: center;">
+            📩 发送邮件反馈至：{feedback_email}
+        </div>
+    </a>
+    """, unsafe_allow_html=True)
+
+# --- 4. 花里胡哨的结尾 ---
+st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("""
+    <div style="text-align: center;">
+        <span style="
+            font-size: 40px; 
+            font-weight: bold; 
+            background: linear-gradient(to left, #ef5350, #f48fb1, #7e57c2, #2196f3, #26c6da, #43a047, #eeff41, #f9a825, #ff5722);
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+        ">
+            ✨ 有事找GARY准没错 ✨
+        </span>
+    </div>
+""", unsafe_allow_html=True)
