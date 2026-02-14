@@ -13,58 +13,63 @@ import random
 st.set_page_config(page_title="ICS2业务自动化整合工具", layout="wide")
 
 # ==========================================
-# 🌟 修复版：鼠标点击随机上浮多彩文字特效
+# 🌟 修复版V2：鼠标点击特效 (内部兼容模式)
 # ==========================================
 def add_click_effect():
     st.markdown("""
     <script>
-        // 强制在主窗口（父窗口）执行，穿透Streamlit的Iframe沙盒
-        var parentDoc = window.parent.document;
-        
-        (function() {
-            var a_idx = 0;
+        // 移除旧的监听器防止重复叠加 (如果有的话)
+        if (window.clickEffectAttached) {
+            // 如果已经加载过，就不再重复加载，防止每次页面刷新导致多重绑定
+        } else {
+            window.clickEffectAttached = true;
             
-            // 绑定点击事件到父级文档
-            parentDoc.onclick = function(event) {
-                var a = new Array("富强", "民主", "文明", "和谐", "自由", "平等", "公正", "法治", "爱国", "敬业", "诚信", "友善");
+            document.body.addEventListener('click', function(e) {
+                var a = ["富强", "民主", "文明", "和谐", "自由", "平等", "公正", "法治", "爱国", "敬业", "诚信", "友善"];
                 
-                var span = parentDoc.createElement("span");
-                span.onselectstart = new Function('event.returnValue=false');
-
-                // 将文字添加到父级body中
-                parentDoc.body.appendChild(span).innerHTML = a[a_idx];
-                a_idx = (a_idx + 1) % a.length;
+                // 随机获取一个词
+                var text = a[Math.floor(Math.random() * a.length)];
                 
-                function randomColor() {
-                    return "rgb(" + ~~(Math.random() * 255) + "," + ~~(Math.random() * 255) + "," + ~~(Math.random() * 255) + ")";
-                }
-
-                // 获取点击坐标 (相对于视口)
-                var x = event.clientX;
-                var y = event.clientY;
-
-                span.style.cssText = "z-index: 9999999; position: fixed; top: " + y + "px; left: " + x + "px; font-weight: bold; color: " + randomColor() + "; user-select: none; pointer-events: none;";
-
-                var opacity = 1;
-                var scale = 1;
+                var span = document.createElement("span");
+                span.textContent = text;
                 
-                // 动画定时器
+                // 随机颜色
+                var color = "rgb(" + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + ")";
+                
+                // 获取点击位置 (兼容滚动条)
+                var x = e.pageX;
+                var y = e.pageY;
+                
+                // 设置样式
+                span.style.zIndex = 9999999999; // 确保在最上层
+                span.style.top = (y - 20) + "px";
+                span.style.left = x + "px";
+                span.style.position = "absolute";
+                span.style.fontWeight = "bold";
+                span.style.color = color;
+                span.style.fontSize = "16px";
+                span.style.userSelect = "none";
+                span.style.pointerEvents = "none"; // 关键：让鼠标点击能穿透文字，不影响下方按钮使用
+                
+                document.body.appendChild(span);
+                
+                // 动画逻辑
+                var alpha = 1;
+                var top = y - 20;
+                
                 var timer = setInterval(function() {
-                    if (opacity <= 0) {
-                        span.parentNode.removeChild(span);
+                    if (alpha <= 0) {
+                        document.body.removeChild(span);
                         clearInterval(timer);
                     } else {
-                        y--; // 向上飘动
-                        opacity -= 0.02; // 逐渐消失
-                        scale += 0.01; // 逐渐放大
-                        
-                        span.style.top = y + "px";
-                        span.style.opacity = opacity;
-                        span.style.transform = "scale(" + scale + ")";
+                        top--;
+                        alpha -= 0.02;
+                        span.style.top = top + "px";
+                        span.style.opacity = alpha;
                     }
                 }, 15);
-            }
-        })();
+            });
+        }
     </script>
     """, unsafe_allow_html=True)
 
