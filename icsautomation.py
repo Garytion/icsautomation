@@ -14,15 +14,15 @@ st.set_page_config(page_title="ICS2业务自动化整合工具", layout="wide")
 # --- 1. 主界面标题与说明 ---
 st.title("📂 ICS2业务自动化整合工具")
 st.info(f"""
-**· 文件一：containerinformation.xlsx**
+**⭐文件一：containerinformation.xlsx**
 - **来源**：此文件通常由系统生成，用于补料。
 - **内容要求**：请将附件中的品名、HS CODE、件数、重量(KGS)、体积(CBM)及单号信息准确复制至本文件。其中“单号”栏位请填写客户申报ICS所用的号码；如客户未指定，则默认使用我司单号。
 
-**· 文件二：icstemplate.xlsx**
+**⭐文件二：icstemplate.xlsx**
 - **来源**：此为ICS申报系统提供的标准申报表模板。
 - **内容要求**：根据您所申报的主单及柜号，将相应的基础柜子信息填写完整即可。
 
-**· 文件三：realdoc.zip**
+**⭐文件三：realdoc.zip**
 - **来源**：此文件为客户在对单过程中，根据我司（深圳）格式要求填写的真实收发货人信息表。
 - **内容要求**：收到客户回传的表格后，请先核验信息无误。随后，按申报单号将同一柜子所有客户的相关资料整理并压缩为一个ZIP文件。
 
@@ -171,15 +171,15 @@ with footer_col2:
     body = urllib.parse.quote("请在此处输入您的意见或报错描述：\n")
     mail_link = f"mailto:{feedback_email}?subject={subject}&body={body}"
     
-    # 使用透明背景和继承样式，确保底色与左侧 st.download_button 完全一致
+    # 强制将背景色设为 Streamlit 蓝色，文字设为白色以确保清晰度
     st.markdown(f"""
     <a href="{mail_link}" style="text-decoration: none;">
         <div style="
-            background-color: rgba(151, 166, 195, 0.15); 
-            color: rgb(49, 51, 63); 
+            background-color: #0068c9; 
+            color: #FFFFFF; 
             line-height: 1.6;
             padding: 0.5rem 1rem;
-            border: 1px solid rgba(49, 51, 63, 0.2);
+            border: 1px solid #0068c9;
             border-radius: 0.5rem;
             text-align: center;
             font-size: 1rem;
@@ -188,7 +188,7 @@ with footer_col2:
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: border-color 0.2s, color 0.2s;
+            font-weight: bold;
         ">
             📩 发送邮件反馈至：{feedback_email}
         </div>
